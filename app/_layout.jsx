@@ -32,8 +32,9 @@ export default function RootLayout() {
     <TemaContext.Provider value={[tema, setTema]}>
       <UserContext.Provider value={[userGoogle, setUserGoogle]}>
         <Stack>
-          <Stack.Screen name="index" />
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login/index" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         </Stack>
       </UserContext.Provider>
     </TemaContext.Provider>

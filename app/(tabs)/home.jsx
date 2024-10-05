@@ -1,24 +1,19 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { TemaContext, UserContext } from "../../context/GlobalState";
+import Header from "../../components/Home/Header";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "expo-router";
+import Slider from "../../components/Home/Slider";
 
 export default function Home() {
   const [background, setBackground] = useContext(TemaContext);
-
   const [userGoogle, setUserGoogle] = useContext(UserContext);
 
   return (
-    <View style={{ backgroundColor: background }}>
-      <Text>Home</Text>
-      <TouchableOpacity onPress={() => setBackground("blue")}>
-        <Text style={{ color: "white" }}>Blue</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => setBackground("red")}>
-        <Text style={{ color: "white" }}>Red</Text>
-      </TouchableOpacity>
-      <View>
-        <Text style={{ color: "white" }}>{userGoogle.name}</Text>
-      </View>
-    </View>
+    <SafeAreaView style={{ padding: 20 }}>
+      <Header user={userGoogle} />
+      <Slider user={userGoogle} />
+    </SafeAreaView>
   );
 }

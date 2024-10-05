@@ -4,7 +4,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import Colors from "@/constants/Colors";
 import { UserContext } from "../context/GlobalState";
-import { Redirect } from "expo-router";
+import { Redirect, router } from "expo-router";
 
 const webClientId =
   "1074629244887-5o1jue331d91mmc07fe0psvkt6m9damb.apps.googleusercontent.com";
@@ -42,6 +42,8 @@ const LoginWithGoogle = () => {
       setUserGoogle(user);
       setTokenGoogle(token);
       setUserActive(user);
+
+      router.push("/");
 
       // return user;
     } catch (error) {
@@ -91,10 +93,10 @@ const LoginWithGoogle = () => {
           Login With Google
         </Text>
       </TouchableOpacity>
-      <View>
+      {/* <View>
         <Text>{JSON.stringify(userGoogle)}</Text>
         <Text>{JSON.stringify(tokenGoogle)}</Text>
-      </View>
+      </View> */}
     </View>
   );
 };
