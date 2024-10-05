@@ -1,11 +1,12 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useContext } from "react";
 import { router } from "expo-router";
-import { TemaContext } from "../../context/GlobalState";
+import { TemaContext, UserContext } from "../../context/GlobalState";
 import LoginWithGoogle from "../../components/LoginWithGoogle";
 
 export default function LoginScreen() {
   const [background, setBackground] = useContext(TemaContext);
+  const [userGoogle, setUserGoogle] = useContext(UserContext);
 
   return (
     <View style={{ backgroundColor: background }}>
@@ -13,7 +14,13 @@ export default function LoginScreen() {
       <TouchableOpacity onPress={() => router.push("/home")}>
         <Text style={{ color: "white" }}>Home</Text>
       </TouchableOpacity>
-      <LoginWithGoogle />
+      {userGoogle ? (
+        <View>
+          <Text style={{ color: "white" }}>{userGoogle.name}</Text>
+        </View>
+      ) : (
+        <LoginWithGoogle />
+      )}
     </View>
   );
 }

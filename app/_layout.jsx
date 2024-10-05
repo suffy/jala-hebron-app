@@ -1,10 +1,11 @@
 import { Stack, SplashScreen } from "expo-router";
-import { TemaContext } from "../context/GlobalState";
+import { TemaContext, UserContext } from "../context/GlobalState";
 import { useContext, useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 
 export default function RootLayout() {
   const [tema, setTema] = useState("#212121");
+  const [userGoogle, setUserGoogle] = useState({});
 
   const [fontsLoaded, error] = useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
@@ -29,10 +30,12 @@ export default function RootLayout() {
 
   return (
     <TemaContext.Provider value={[tema, setTema]}>
-      <Stack>
-        <Stack.Screen name="index" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
+      <UserContext.Provider value={[userGoogle, setUserGoogle]}>
+        <Stack>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </UserContext.Provider>
     </TemaContext.Provider>
   );
 }
