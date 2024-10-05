@@ -2,6 +2,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import React, { useContext } from "react";
 import { router } from "expo-router";
 import { TemaContext } from "../../context/GlobalState";
+import LoginWithGoogle from "../../components/LoginWithGoogle";
 
 export default function LoginScreen() {
   const [background, setBackground] = useContext(TemaContext);
@@ -12,6 +13,7 @@ export default function LoginScreen() {
       <TouchableOpacity onPress={() => router.push("/home")}>
         <Text style={{ color: "white" }}>Home</Text>
       </TouchableOpacity>
+      <LoginWithGoogle />
     </View>
   );
 }
