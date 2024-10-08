@@ -47,6 +47,7 @@ export default function LoginScreen() {
           Konseling, Kemanusiaan, Beasiswa, Pelayanan, Kesehatan, Others
         </Text>
         <TouchableOpacity
+          onPress={() => router.push("/(auth)/sign-in")}
           style={{
             marginTop: 20,
             borderWidth: 1,

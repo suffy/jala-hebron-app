@@ -9,7 +9,7 @@ export default function Index() {
   const [userGoogle, setUserGoogle] = useContext(UserContext);
 
   useEffect(() => {
-    setBackground("red");
+    setBackground("#212121");
   }, []);
 
   return (
