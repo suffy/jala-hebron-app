@@ -46,17 +46,14 @@ export const ListSlider = [
 export const ListCategory = [
   {
     id: 1,
-    title: "konsultasi",
-    // image: "https://cdn-icons-png.flaticon.com/128/1189/1189142.png",
-
-    image: require("../assets/images/help.png"),
-    color: "#212121",
+    nama: "Konseling",
+    image: "https://cdn-icons-png.flaticon.com/128/610/610413.png",
+    // image: require("../assets/images/help.png"),
   },
   {
     id: 2,
-    title: "kemanusiaan",
-    image: require("../assets/images/help.png"),
-    // image: "https://cdn-icons-png.flaticon.com/128/1189/1189142.png",
-    color: "#FFD7C4",
+    title: "beasiswa",
+    image: "https://cdn-icons-png.flaticon.com/128/1903/1903172.png",
+    // image: require("../assets/images/help.png"),
   },
 ];

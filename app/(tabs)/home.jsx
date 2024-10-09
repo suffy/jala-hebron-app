@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import React, { useContext, useEffect } from "react";
 import { TemaContext, UserContext } from "../../context/GlobalState";
 import Header from "../../components/Home/Header";
@@ -16,9 +16,11 @@ export default function Home() {
     <SafeAreaView
       style={{ padding: 20, backgroundColor: Colors.WHITE, height: "100%" }}
     >
-      <Header user={userGoogle} />
-      <Slider user={userGoogle} />
-      <Category user={userGoogle} />
+      <ScrollView>
+        <Header user={userGoogle} />
+        <Slider user={userGoogle} />
+        <Category user={userGoogle} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
