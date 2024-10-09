@@ -5,14 +5,40 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Pressable,
+  ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
+import * as ImagePicker from "expo-image-picker";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { storage } from "../../FirebaseConfig";
+import axios from "axios";
 
 export default function Form() {
   const navigation = useNavigation();
+  const [image, setImage] = useState();
+  const [loader, setLoader] = useState(false);
+  const [formData, setFormData] = useState();
+
+  const imagePicker = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    console.log(result);
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -21,6 +47,70 @@ export default function Form() {
       headerTransparent: true,
     });
   }, []);
+
+  const handleInputChange = (fieldName, fieldValue) => {
+    console.log(fieldName, fieldValue);
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: fieldValue,
+    }));
+  };
+
+  const submit = () => {
+    console.log(formData);
+    if (Object.keys(formData).length != 4) {
+      ToastAndroid.show("Mohon lengkapi semua data", ToastAndroid.BOTTOM);
+      return;
+    }
+    UploadImage();
+  };
+
+  const UploadImage = async () => {
+    setLoader(true);
+    const resp = await fetch(image);
+    const blob = await resp.blob();
+    const storageRef = ref(storage, "/jala/" + Date.now() + ".jpg");
+
+    uploadBytes(storageRef, blob)
+      .then((snapshot) => {
+        console.log("File uploaded");
+      })
+      .then((resp) => {
+        getDownloadURL(storageRef).then(async (downloadUrl) => {
+          console.log(downloadUrl);
+          SaveFormData(downloadUrl);
+        });
+      });
+  };
+
+  const url =
+    "https://ee32-27-123-221-81.ngrok-free.app/restapi/api/hebron/green";
+
+  const SaveFormData = async (imageUrl) => {
+    console.log("image_url : ", imageUrl);
+    console.log("formData : ", formData);
+
+    try {
+      const data = {
+        "X-API-KEY": 123,
+        secret: "96b962bcd044a37f481450b16e0cba1a_93428906.gyadkjuiaz",
+        nama: formData.nama,
+        nohp: formData.nohp,
+        alamat: formData.alamat,
+        qty: formData.qty,
+        url: imageUrl,
+        filename: imageUrl,
+        email: "HjTtK@example.com",
+      };
+
+      const response = await axios.post(url, data);
+      console.log(response.data);
+    } catch (error) {
+      console.log("Error : ", error.message);
+    }
+
+    setLoader(false);
+  };
 
   return (
     <SafeAreaView
@@ -277,7 +367,7 @@ export default function Form() {
               }}
               placeholder="nama"
               placeholderTextColor="#7b7b8b"
-              onChangeText={(text) => console.log(text)}
+              onChangeText={(value) => handleInputChange("nama", value)}
             />
           </View>
         </View>
@@ -312,7 +402,7 @@ export default function Form() {
               }}
               placeholder="nomor aktif"
               placeholderTextColor="#7b7b8b"
-              onChangeText={(text) => console.log(text)}
+              onChangeText={(value) => handleInputChange("nohp", value)}
               keyboardType="number-pad"
             />
           </View>
@@ -350,7 +440,7 @@ export default function Form() {
               }}
               placeholder="alamat lengkap"
               placeholderTextColor="#7b7b8b"
-              onChangeText={(text) => console.log(text)}
+              onChangeText={(value) => handleInputChange("alamat", value)}
               multiline
               numberOfLines={5}
               textAlignVertical="top"
@@ -388,13 +478,50 @@ export default function Form() {
               }}
               placeholder="jumlah botol plastik"
               placeholderTextColor="#7b7b8b"
-              onChangeText={(text) => console.log(text)}
+              onChangeText={(value) => handleInputChange("qty", value)}
               keyboardType="number-pad"
             />
           </View>
         </View>
 
+        <View style={{ marginTop: 20 }}>
+          <Text
+            style={{
+              color: Colors.PRIMARY,
+              fontSize: 16,
+              fontFamily: "Poppins-Medium",
+            }}
+          >
+            Masukkan Gambar
+          </Text>
+          <Pressable onPress={imagePicker}>
+            {!image ? (
+              <Image
+                source={require("./../../assets/images/placeholder.png")}
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 15,
+                  borderWidth: 1,
+                  borderColor: Colors.GRAY,
+                }}
+              />
+            ) : (
+              <Image
+                source={{ uri: image }}
+                style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: 15,
+                }}
+              />
+            )}
+          </Pressable>
+        </View>
+
         <TouchableOpacity
+          disabled={loader}
+          onPress={submit}
           style={{
             marginTop: 20,
             padding: 15,
@@ -405,17 +532,20 @@ export default function Form() {
             borderWidth: 1,
             borderColor: Colors.PRIMARY,
           }}
-          onPress={() => console.log("Kirim data anda")}
         >
-          <Text
-            style={{
-              color: Colors.PRIMARY,
-              fontFamily: "Poppins-Bold",
-              fontSize: 20,
-            }}
-          >
-            Kirim data anda
-          </Text>
+          {loader ? (
+            <ActivityIndicator size={"large"} color={Colors.WHITE} />
+          ) : (
+            <Text
+              style={{
+                color: Colors.PRIMARY,
+                fontFamily: "Poppins-Bold",
+                fontSize: 20,
+              }}
+            >
+              Kirim data anda
+            </Text>
+          )}
         </TouchableOpacity>
 
         <View style={{ height: 50 }}></View>
