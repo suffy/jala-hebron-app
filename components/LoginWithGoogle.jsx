@@ -1,10 +1,17 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import Colors from "@/constants/Colors";
-import { UserContext } from "../context/GlobalState";
 import { Redirect, router } from "expo-router";
+import { UserDetailContext } from "../context/UserDetailContext";
+import Services from "../constants/Services";
 
 const webClientId =
   "1074629244887-5o1jue331d91mmc07fe0psvkt6m9damb.apps.googleusercontent.com";
@@ -17,35 +24,32 @@ const LoginWithGoogle = () => {
     androidClientId: androidClientId,
   };
 
-  const [userGoogle, setUserGoogle] = useState({});
-  const [tokenGoogle, setTokenGoogle] = useState({});
-
-  const [userActive, setUserActive] = useContext(UserContext);
-
   const [request, response, promptAsync] = Google.useAuthRequest(config);
 
   const getUserProfile = async (token) => {
     if (!token) return;
 
     try {
-      console.log("jalankan login");
       const response = await fetch(
         "https://www.googleapis.com/userinfo/v2/me",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       const user = await response.json();
-      console.log(user);
 
-      setUserGoogle(user);
-      setTokenGoogle(token);
-      setUserActive(user);
+      // menyimpan data login google ke dalan local storage
+      let dataLogin = {
+        isLogin: true,
+        token: token,
+        user: user,
+      };
 
-      router.push("/");
-
-      // return user;
+      try {
+        await Services.storeData("dataLogin", JSON.stringify(dataLogin));
+      } catch (error) {
+        alert("Error : ", error);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -55,14 +59,13 @@ const LoginWithGoogle = () => {
     if (response?.type === "success") {
       const { authentication } = response;
       const token = authentication?.accessToken;
-      console.log("access token : ", token);
       return getUserProfile(token);
     }
   };
 
   useEffect(() => {
+    console.log("response loginwithgoogle : ", response);
     handleToken();
-    console.log("aaaaaa");
   }, [response]);
 
   return (
@@ -93,14 +96,8 @@ const LoginWithGoogle = () => {
           Login With Google
         </Text>
       </TouchableOpacity>
-      {/* <View>
-        <Text>{JSON.stringify(userGoogle)}</Text>
-        <Text>{JSON.stringify(tokenGoogle)}</Text>
-      </View> */}
     </View>
   );
 };
 
 export default LoginWithGoogle;
-
-const styles = StyleSheet.create({});

@@ -8,22 +8,25 @@ import {
   Pressable,
   ActivityIndicator,
   ToastAndroid,
+  StyleSheet,
 } from "react-native";
-import React, { useEffect, useState } from "react";
-import { useNavigation } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
+import { router, useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
 import * as ImagePicker from "expo-image-picker";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import { storage } from "../../FirebaseConfig";
 import axios from "axios";
+import { UserDetailContext } from "../../context/UserDetailContext";
+import * as FileSystem from "expo-file-system";
 
 export default function Form() {
   const navigation = useNavigation();
   const [image, setImage] = useState();
   const [loader, setLoader] = useState(false);
-  const [formData, setFormData] = useState();
+  const [formData, setFormData] = useState({});
+  const { userGoogle, setUserGoogle } = useContext(UserDetailContext);
 
   const imagePicker = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -62,51 +65,62 @@ export default function Form() {
       ToastAndroid.show("Mohon lengkapi semua data", ToastAndroid.BOTTOM);
       return;
     }
-    UploadImage();
+    // UploadImage();
+
+    uploadGambar(image);
   };
 
-  const UploadImage = async () => {
+  const url = process.env.EXPO_PUBLIC_HEBRON_URL;
+  const uploadGambar = async (imageUri) => {
     setLoader(true);
-    const resp = await fetch(image);
-    const blob = await resp.blob();
-    const storageRef = ref(storage, "/jala/" + Date.now() + ".jpg");
+    const response = await FileSystem.uploadAsync(`${url}/file`, imageUri, {
+      fieldName: "file",
+      httpMethod: "POST",
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "X-API-KEY": `${process.env.EXPO_PUBLIC_HEBRON_API_KEY}`,
+      },
+    });
 
-    uploadBytes(storageRef, blob)
-      .then((snapshot) => {
-        console.log("File uploaded");
-      })
-      .then((resp) => {
-        getDownloadURL(storageRef).then(async (downloadUrl) => {
-          console.log(downloadUrl);
-          SaveFormData(downloadUrl);
-        });
-      });
+    console.log(response);
+    console.log(response.status);
+
+    if (response.status == 200) {
+      const imageUrl = JSON.parse(response.body)?.filename;
+
+      console.log(imageUrl);
+      SaveFormData(imageUrl);
+    }
+
+    setLoader(false);
   };
-
-  const url =
-    "https://ee32-27-123-221-81.ngrok-free.app/restapi/api/hebron/green";
 
   const SaveFormData = async (imageUrl) => {
-    console.log("image_url : ", imageUrl);
-    console.log("formData : ", formData);
-
     try {
       const data = {
-        "X-API-KEY": 123,
-        secret: "96b962bcd044a37f481450b16e0cba1a_93428906.gyadkjuiaz",
+        "X-API-KEY": process.env.EXPO_PUBLIC_HEBRON_API_KEY,
+        secret: process.env.EXPO_PUBLIC_HEBRON_SECRET,
         nama: formData.nama,
         nohp: formData.nohp,
         alamat: formData.alamat,
         qty: formData.qty,
         url: imageUrl,
         filename: imageUrl,
-        email: "HjTtK@example.com",
+        email: userGoogle.email,
       };
 
-      const response = await axios.post(url, data);
+      const response = await axios.post(url + "/green", data);
       console.log(response.data);
+
+      if (response && response.data) {
+        setLoader(false);
+        ToastAndroid.show("Data Berhasil Masuk", ToastAndroid.LONG);
+        router.replace("/green/riwayat");
+      }
     } catch (error) {
       console.log("Error : ", error.message);
+      ToastAndroid.show("Data Gagal Masuk", ToastAndroid.LONG);
     }
 
     setLoader(false);
@@ -121,250 +135,14 @@ export default function Form() {
         height: "100%",
       }}
     >
-      <ScrollView>
-        <View>
-          <Text
-            style={{
-              fontSize: 25,
-              color: Colors.PRIMARY,
-              fontFamily: "Poppins-Bold",
-            }}
-          >
-            Petunjuk Penjualan Sampah Plastik
-          </Text>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>Formulir Pengisian Data :</Text>
 
-          <Text
-            style={{
-              fontSize: 20,
-              color: Colors.PRIMARY,
-              fontFamily: "Poppins-Medium",
-              marginTop: 20,
-            }}
-          >
-            Persiapan
-          </Text>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>1.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Pastikan sampah anda merupakan sampah bernilai ekonomis
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>2.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Pisahkan semua sampah sesuai dengan klarifikasi jenisnya (bedakan
-              antara kardus, plastik, dan lainnya)
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>3.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Bersihkan sampah dan lepas striker yang menempel
-            </Text>
-          </View>
-
-          <Text
-            style={{
-              fontSize: 20,
-              color: Colors.PRIMARY,
-              fontFamily: "Poppins-Medium",
-              marginTop: 20,
-            }}
-          >
-            Pengisian Formulir
-          </Text>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>1.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Setelah melakukan persiapan, Isi data anda di Formulir Pengisian
-              Data di bawah ini
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>2.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Jangan sungkan hubungi admin kami di nomor 08123-456-789 bila anda
-              mengalami kendala
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>3.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Setelah mengisi data, admin akan menghubungi untuk konfirmasikan
-              data. Maksimal 1x24 jam. Kunjungi terus aplikasi untuk mengetahui
-              update data penjualan anda
-            </Text>
-          </View>
-
-          <Text
-            style={{
-              fontSize: 20,
-              color: Colors.PRIMARY,
-              fontFamily: "Poppins-Medium",
-              marginTop: 20,
-            }}
-          >
-            Pengambilan Sampah
-          </Text>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>1.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Petugas akan menghubungi dan mengkonfirmasi data anda terlebih
-              dahulu sebelum menuju ke lokasi anda
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>2.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Jika semua data valid dan lokasi masuk ke jangkauana kami, maka
-              petugas akan datang ke lokasi anda
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>3.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Petugas akan mengambil sampah anda, dan memasukkan data anda ke
-              dalam aplikasi
-            </Text>
-          </View>
-
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              gap: 10,
-            }}
-          >
-            <Text>4.</Text>
-            <Text
-              style={{ fontFamily: "Poppins-Medium", fontSize: 15, flex: 1 }}
-            >
-              Secara otomatis, saldo anda akan berubah sesuai dengan jumlah dari
-              sampah anda
-            </Text>
-          </View>
-        </View>
-
-        <Text
-          style={{
-            fontSize: 25,
-            color: Colors.PRIMARY,
-            fontFamily: "Poppins-Bold",
-            marginTop: 20,
-          }}
-        >
-          Formulir Pengisian Data :
-        </Text>
-
-        <View style={{ marginTop: 20 }}>
-          <Text
-            style={{
-              color: Colors.PRIMARY,
-              fontSize: 16,
-              fontFamily: "Poppins-Medium",
-            }}
-          >
-            Nama
-          </Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 20,
-              marginTop: 10,
-              width: "100%",
-              height: 50,
-              backgroundColor: Colors.WHITE,
-            }}
-          >
+        <View style={{ marginTop: 10 }}>
+          <Text style={styles.label}>Nama</Text>
+          <View style={styles.inputView}>
             <TextInput
-              style={{
-                flex: 1,
-                color: Colors.PRIMARY,
-                fontFamily: "Poppins-Medium",
-                fontSize: 16,
-              }}
+              style={styles.input}
               placeholder="nama"
               placeholderTextColor="#7b7b8b"
               onChangeText={(value) => handleInputChange("nama", value)}
@@ -373,33 +151,10 @@ export default function Form() {
         </View>
 
         <View style={{ marginTop: 20 }}>
-          <Text
-            style={{
-              color: Colors.PRIMARY,
-              fontSize: 16,
-              fontFamily: "Poppins-Medium",
-            }}
-          >
-            Nomor yang bisa dihubungi / Whatsapp
-          </Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 20,
-              marginTop: 10,
-              width: "100%",
-              height: 50,
-              backgroundColor: Colors.WHITE,
-            }}
-          >
+          <Text style={styles.label}>Nomor yang bisa dihubungi / Whatsapp</Text>
+          <View style={styles.inputView}>
             <TextInput
-              style={{
-                flex: 1,
-                color: Colors.PRIMARY,
-                fontFamily: "Poppins-Medium",
-                fontSize: 16,
-              }}
+              style={styles.input}
               placeholder="nomor aktif"
               placeholderTextColor="#7b7b8b"
               onChangeText={(value) => handleInputChange("nohp", value)}
@@ -409,35 +164,10 @@ export default function Form() {
         </View>
 
         <View style={{ marginTop: 20 }}>
-          <Text
-            style={{
-              color: Colors.PRIMARY,
-              fontSize: 16,
-              fontFamily: "Poppins-Medium",
-            }}
-          >
-            Alamat lengkap
-          </Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 20,
-              marginTop: 10,
-              width: "100%",
-              height: 50,
-              backgroundColor: Colors.WHITE,
-              height: 100,
-            }}
-          >
+          <Text style={styles.label}>Alamat lengkap</Text>
+          <View style={styles.inputAlamatView}>
             <TextInput
-              style={{
-                flex: 1,
-                color: Colors.PRIMARY,
-                fontFamily: "Poppins-Medium",
-                fontSize: 16,
-                marginTop: 10,
-              }}
+              style={styles.inputAlamat}
               placeholder="alamat lengkap"
               placeholderTextColor="#7b7b8b"
               onChangeText={(value) => handleInputChange("alamat", value)}
@@ -449,33 +179,10 @@ export default function Form() {
         </View>
 
         <View style={{ marginTop: 20 }}>
-          <Text
-            style={{
-              color: Colors.PRIMARY,
-              fontSize: 16,
-              fontFamily: "Poppins-Medium",
-            }}
-          >
-            Jumlah botol plastik
-          </Text>
-          <View
-            style={{
-              borderWidth: 1,
-              borderRadius: 10,
-              paddingHorizontal: 20,
-              marginTop: 10,
-              width: "100%",
-              height: 50,
-              backgroundColor: Colors.WHITE,
-            }}
-          >
+          <Text style={styles.label}>Jumlah botol plastik</Text>
+          <View style={styles.inputView}>
             <TextInput
-              style={{
-                flex: 1,
-                color: Colors.PRIMARY,
-                fontFamily: "Poppins-Medium",
-                fontSize: 16,
-              }}
+              style={styles.input}
               placeholder="jumlah botol plastik"
               placeholderTextColor="#7b7b8b"
               onChangeText={(value) => handleInputChange("qty", value)}
@@ -485,36 +192,15 @@ export default function Form() {
         </View>
 
         <View style={{ marginTop: 20 }}>
-          <Text
-            style={{
-              color: Colors.PRIMARY,
-              fontSize: 16,
-              fontFamily: "Poppins-Medium",
-            }}
-          >
-            Masukkan Gambar
-          </Text>
+          <Text style={styles.label}>Masukkan Gambar Barang</Text>
           <Pressable onPress={imagePicker}>
             {!image ? (
               <Image
                 source={require("./../../assets/images/placeholder.png")}
-                style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 15,
-                  borderWidth: 1,
-                  borderColor: Colors.GRAY,
-                }}
+                style={styles.image}
               />
             ) : (
-              <Image
-                source={{ uri: image }}
-                style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 15,
-                }}
-              />
+              <Image source={{ uri: image }} style={styles.image} />
             )}
           </Pressable>
         </View>
@@ -522,23 +208,14 @@ export default function Form() {
         <TouchableOpacity
           disabled={loader}
           onPress={submit}
-          style={{
-            marginTop: 20,
-            padding: 15,
-            backgroundColor: Colors.SECONDARY,
-            borderRadius: 10,
-            justifyContent: "center",
-            alignItems: "center",
-            borderWidth: 1,
-            borderColor: Colors.PRIMARY,
-          }}
+          style={styles.button}
         >
           {loader ? (
             <ActivityIndicator size={"large"} color={Colors.WHITE} />
           ) : (
             <Text
               style={{
-                color: Colors.PRIMARY,
+                color: Colors.WHITE,
                 fontFamily: "Poppins-Bold",
                 fontSize: 20,
               }}
@@ -553,3 +230,62 @@ export default function Form() {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize: 20,
+    color: Colors.PRIMARY,
+    fontFamily: "Poppins-Bold",
+    marginTop: 10,
+  },
+  label: {
+    color: Colors.PRIMARY,
+    fontSize: 15,
+    fontFamily: "Poppins-Regular",
+  },
+  inputView: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginTop: 10,
+    width: "100%",
+    height: 50,
+    backgroundColor: Colors.WHITE,
+  },
+  input: {
+    flex: 1,
+    color: Colors.PRIMARY,
+    fontFamily: "Poppins-Regular",
+    fontSize: 16,
+  },
+  inputAlamatView: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    marginTop: 5,
+    width: "100%",
+    backgroundColor: Colors.WHITE,
+    height: 90,
+  },
+  inputAlamat: {
+    flex: 1,
+    color: Colors.PRIMARY,
+    fontFamily: "Poppins-Regular",
+    fontSize: 16,
+    marginTop: 10,
+  },
+  button: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: Colors.SECONDARY,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: Colors.PRIMARY,
+  },
+  image: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+});

@@ -6,56 +6,17 @@ import axios from "axios";
 import Categories from "../Categories";
 import Recipes from "../Recipes";
 import { router } from "expo-router";
+import services from "../../constants/Services";
+import { StyleSheet } from "react-native";
 
 export default function Category() {
-  const [activeCategory, setActiveCategory] = useState("Beef");
-  const [categories, setCategories] = useState([]);
-  const [meals, setMeals] = useState([]);
-
   useEffect(() => {
-    // getCategories();
-    // getRecipes();
     getCategoriesHebron();
-    // console.log(getCategoriesHebron());
   }, []);
 
-  const getCategories = async () => {
-    try {
-      const response = await axios.get(
-        "https://www.themealdb.com/api/json/v1/1/categories.php"
-      );
-
-      if (response && response.data) {
-        setCategories(response.data.categories);
-        console.log(response.data.categories);
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  const handleChangeCategory = (category) => {
-    console.log(category);
-    getRecipes(category);
-    setActiveCategory(category);
-    setMeals([]);
-  };
-
-  const getRecipes = async (category = "Beef") => {
-    try {
-      const response = await axios.get(
-        `https://www.themealdb.com/api/json/v1/1/filter.php?c=${category}`
-      );
-
-      if (response && response.data) {
-        setMeals(response.data.meals);
-        // console.log(response.data.meals);
-        // console.log(response.data.meals);
-        // console.log(categories);
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
+  const logout = async () => {
+    await services.storeData("dataLogin", "{}");
+    router.push("/login");
   };
 
   const getCategoriesHebron = async () => {
@@ -66,7 +27,7 @@ export default function Category() {
 
       if (response && response.data) {
         setCategories(response.data.data);
-        console.log(response.data.data);
+        // console.log(response.data.data);
       }
     } catch (error) {
       console.log(error.message);
@@ -75,183 +36,113 @@ export default function Category() {
 
   return (
     <View style={{ marginTop: 20 }}>
-      <View>
-        <Text style={{ fontFamily: "Poppins-Bold", fontSize: 20 }}>
-          Category
-        </Text>
-      </View>
-
-      {/* Categories from api */}
-      {/* <View style={{}}>
-        <Categories
-          categories={categories}
-          activeCategory={activeCategory}
-          handleChangeCategory={handleChangeCategory}
-        />
-      </View> */}
-
+      <Text style={{ fontFamily: "Poppins-Bold", fontSize: 20 }}>Category</Text>
       {/* Static Category */}
-      <View>
-        <View style={{ marginTop: 20 }}>
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flex: 1,
-              justifyContent: "space-around",
-              gap: 1,
-            }}
+      <View style={{ marginTop: 10 }}>
+        <View style={styles.container}>
+          <TouchableOpacity
+            style={styles.icon}
+            onPress={() => router.push("/konseling")}
           >
-            <View style={{}}>
+            <View style={styles.containerImage}>
               <Image
                 source={{
                   uri: "https://cdn-icons-png.flaticon.com/128/610/610413.png",
                 }}
-                style={{ width: 55, height: 55, alignSelf: "center" }}
+                style={styles.iconImage}
               />
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontFamily: "Poppins-Medium",
-                  marginTop: 10,
-                }}
-              >
-                Konseling
-              </Text>
             </View>
+            <Text style={styles.textIcon}>Konseling</Text>
+          </TouchableOpacity>
 
-            <View style={{}}>
+          <TouchableOpacity
+            style={styles.icon}
+            onPress={() => router.push("/beasiswa")}
+          >
+            <View style={styles.containerImage}>
               <Image
                 source={{
                   uri: "https://cdn-icons-png.flaticon.com/128/1903/1903172.png",
                 }}
-                style={{ width: 55, height: 55, alignSelf: "center" }}
+                style={styles.iconImage}
               />
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontFamily: "Poppins-Medium",
-                  marginTop: 10,
-                }}
-              >
-                Beasiswa
-              </Text>
             </View>
+            <Text style={styles.textIcon}>Beasiswa</Text>
+          </TouchableOpacity>
 
-            <View style={{}}>
+          <TouchableOpacity
+            style={styles.icon}
+            onPress={() => router.push("/pelayanan")}
+          >
+            <View style={styles.containerImage}>
               <Image
                 source={{
                   uri: "https://cdn-icons-png.flaticon.com/128/4807/4807598.png",
                 }}
-                style={{
-                  width: 55,
-                  height: 55,
-                  alignSelf: "center",
-                }}
+                style={styles.iconImage}
               />
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontFamily: "Poppins-Medium",
-                  marginTop: 10,
-                  fontSize: 15,
-                  flex: 1,
-                }}
-              >
-                Pelayanan
-              </Text>
             </View>
+            <Text style={styles.textIcon}>Pelayanan</Text>
+          </TouchableOpacity>
 
-            <View style={{}}>
+          <TouchableOpacity
+            style={styles.icon}
+            onPress={() => router.push("/kemanusiaan")}
+          >
+            <View style={styles.containerImage}>
               <Image
                 source={{
                   uri: "https://cdn-icons-png.flaticon.com/128/2597/2597143.png",
                 }}
-                style={{ width: 55, height: 55 }}
+                style={styles.iconImage}
               />
-              <View style={{ flexDirection: "row" }}>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontFamily: "Poppins-Medium",
-                    marginTop: 10,
-                    fontSize: 15,
-                    flex: 1,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  Kemanusiaan
-                </Text>
-              </View>
             </View>
-          </View>
+            <Text style={styles.textIcon}>Kemanusiaan</Text>
+          </TouchableOpacity>
+        </View>
 
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              flex: 1,
-              // justifyContent: "space-around",
-              gap: 10,
-            }}
+        <View style={styles.container}>
+          <TouchableOpacity
+            onPress={() => router.push("/green/petunjuk")}
+            style={styles.icon}
           >
-            <TouchableOpacity
-              onPress={() => router.push("/green/form")}
-              style={{
-                marginTop: 1,
-                width: "20%",
-                marginLeft: 10,
-              }}
-            >
+            <View style={styles.containerImage}>
               <Image
                 source={{
                   uri: "https://cdn-icons-png.flaticon.com/128/3658/3658345.png",
                 }}
-                style={{ width: 55, height: 55, alignSelf: "center" }}
+                style={styles.iconImage}
               />
-              <View style={{ flexDirection: "row" }}>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontFamily: "Poppins-Medium",
-                    marginTop: 10,
-                    fontSize: 15,
-                  }}
-                >
-                  Jual Sampah
-                </Text>
-              </View>
-            </TouchableOpacity>
+            </View>
+            <Text style={styles.textIcon}>Penjualan Plastik Bekas</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => router.push("/green/form")}
-              style={{
-                marginTop: 1,
-                width: "20%",
-                marginLeft: 10,
-              }}
-            >
+          <TouchableOpacity
+            onPress={() => router.push("/green/riwayat")}
+            style={styles.icon}
+          >
+            <View style={styles.containerImage}>
               <Image
                 source={{
                   uri: "https://cdn-icons-png.flaticon.com/128/583/583985.png",
                 }}
-                style={{ width: 55, height: 55, alignSelf: "center" }}
+                style={styles.iconImage}
               />
-              <View style={{ flexDirection: "row" }}>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontFamily: "Poppins-Medium",
-                    marginTop: 10,
-                    fontSize: 15,
-                    marginLeft: 14,
-                  }}
-                >
-                  Saldo Anda
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+            </View>
+            <Text style={styles.textIcon}>History Transaksi</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={logout} style={styles.icon}>
+            <View style={styles.containerImage}>
+              <Image
+                source={{
+                  uri: "https://cdn-icons-png.flaticon.com/128/4436/4436954.png",
+                }}
+                style={styles.iconImage}
+              />
+            </View>
+            <Text style={styles.textIcon}>Logout</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -264,3 +155,34 @@ export default function Category() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  textIcon: {
+    textAlign: "center",
+    fontFamily: "Poppins-Medium",
+    marginTop: 10,
+    fontSize: 13,
+    flex: 1,
+    flexWrap: "wrap",
+  },
+  containerImage: {
+    backgroundColor: Colors.LIGHT_GRAY,
+    padding: 15,
+    borderRadius: 99,
+    elevation: 0.5,
+  },
+  iconImage: { width: 35, height: 35, alignSelf: "center" },
+  icon: {
+    width: "25%",
+    textAlign: "center",
+    alignItems: "center",
+  },
+  container: {
+    display: "flex",
+    flexDirection: "row",
+    flex: 1,
+    // justifyContent: "space-around",
+    // alignItems: "center",
+    // alignContent: "center",
+  },
+});

@@ -1,25 +1,43 @@
-import { View, Text, TouchableOpacity, Image } from "react-native";
-import React, { useContext } from "react";
+import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
+import React, { useContext, useEffect } from "react";
 import { router } from "expo-router";
-import { TemaContext, UserContext } from "../../context/GlobalState";
 import LoginWithGoogle from "../../components/LoginWithGoogle";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/Colors";
+import Services from "../../constants/Services";
+import { UserDetailContext } from "../../context/UserDetailContext";
 
 export default function LoginScreen() {
-  const [background, setBackground] = useContext(TemaContext);
-  const [userGoogle, setUserGoogle] = useContext(UserContext);
+  const { userGoogle, setUserGoogle } = useContext(UserDetailContext);
+
+  useEffect(() => {
+    console.log("useEffect login");
+    checkUserAuth();
+  }, []);
+
+  const checkUserAuth = async () => {
+    try {
+      let jsonvalue = await Services.getData("dataLogin");
+      jsonvalueParse = JSON.parse(jsonvalue);
+      let isLogin = jsonvalueParse.isLogin;
+      if (isLogin == true) {
+        router.replace("/(tabs)/home");
+      }
+    } catch (error) {
+      alert("Error : ", error.message);
+    }
+  };
 
   return (
-    <View style={{ backgroundColor: Colors.WHITE, height: "100%" }}>
+    <ScrollView style={{ backgroundColor: Colors.WHITE, height: "100%" }}>
       <Image
-        source={require("./../../assets/images/login.jpg")}
-        style={{ width: "100%", height: 500 }}
+        source={require("./../../assets/images/login.png")}
+        style={{ width: "100%", height: 500, marginTop: 10 }}
       />
       <View
         style={{
           backgroundColor: Colors.WHITE,
-          marginTop: -20,
+          marginTop: 20,
           borderTopLeftRadius: 30,
           borderTopRightRadius: 30,
           height: "100%",
@@ -75,6 +93,6 @@ export default function LoginScreen() {
         </TouchableOpacity>
         <LoginWithGoogle />
       </View>
-    </View>
+    </ScrollView>
   );
 }

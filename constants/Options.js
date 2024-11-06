@@ -48,12 +48,10 @@ export const ListCategory = [
     id: 1,
     nama: "Konseling",
     image: "https://cdn-icons-png.flaticon.com/128/610/610413.png",
-    // image: require("../assets/images/help.png"),
   },
   {
     id: 2,
     title: "beasiswa",
     image: "https://cdn-icons-png.flaticon.com/128/1903/1903172.png",
-    // image: require("../assets/images/help.png"),
   },
 ];

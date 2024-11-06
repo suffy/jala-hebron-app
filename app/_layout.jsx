@@ -1,11 +1,10 @@
 import { Stack, SplashScreen } from "expo-router";
-import { TemaContext, UserContext } from "../context/GlobalState";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
+import { UserDetailContext } from "../context/UserDetailContext";
 
 export default function RootLayout() {
-  const [tema, setTema] = useState("#212121");
-  const [userGoogle, setUserGoogle] = useState({});
+  const [userGoogle, setUserGoogle] = useState();
 
   const [fontsLoaded, error] = useFonts({
     "Poppins-Black": require("../assets/fonts/Poppins-Black.ttf"),
@@ -29,15 +28,17 @@ export default function RootLayout() {
   }
 
   return (
-    <TemaContext.Provider value={[tema, setTema]}>
-      <UserContext.Provider value={[userGoogle, setUserGoogle]}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="login/index" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        </Stack>
-      </UserContext.Provider>
-    </TemaContext.Provider>
+    <UserDetailContext.Provider value={{ userGoogle, setUserGoogle }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="login/index" />
+        <Stack.Screen name="(tabs)" />
+        {/* <Stack.Screen name="(auth)" />
+      <Stack.Screen name="konseling/index" />
+      <Stack.Screen name="beasiswa/index" />
+      <Stack.Screen name="pelayanan/index" />
+      <Stack.Screen name="kemanusiaan/index" /> */}
+      </Stack>
+    </UserDetailContext.Provider>
   );
 }

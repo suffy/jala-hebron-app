@@ -12,27 +12,16 @@ export default function Slider() {
         alignItems: "center",
       }}
     >
-      <View style={{ width: "100%", marginTop: 20 }}>
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={ListSlider}
-          renderItem={({ item }) => (
-            <View style={{ marginRight: 20 }}>
-              <Image
-                source={item.image}
-                style={{
-                  width: 300,
-                  height: 170,
-                  borderRadius: 20,
-                  padding: 10,
-                  resizeMode: "stretch",
-                }}
-              />
-            </View>
-          )}
-        />
-      </View>
+      <Image
+        source={require("../../assets/images/banner-go-green.jpg")}
+        style={{
+          width: "100%",
+          height: 200,
+          borderRadius: 30,
+          marginTop: 20,
+          resizeMode: "contain",
+        }}
+      />
     </View>
   );
 }
